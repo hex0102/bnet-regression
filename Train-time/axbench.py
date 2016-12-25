@@ -28,12 +28,21 @@ from collections import OrderedDict
 
 
 
-
+def min_max(x):
+  
+  Min=x.min(axis=0)
+  Max=x.max(axis=0)
+  
+  diff=Max-Min
+  #diff=max(x)-min(x) 
+  diff=np.asarray([i if(i!=0) else 1 for i in diff])
+  x=np.asarray((x-Min)/diff,dtype='float32')
+  return x
 
 if __name__ == "__main__":
     
     # BN parameters
-    batch_size = 100
+    batch_size = 50
     print("batch_size = "+str(batch_size))
     # alpha is the exponential moving average factor
     # alpha = .15
@@ -43,7 +52,7 @@ if __name__ == "__main__":
     print("epsilon = "+str(epsilon))
     
     # MLP parameters
-    num_units = 512
+    num_units = 256
     print("num_units = "+str(num_units))
     n_hidden_layers = 2
     print("n_hidden_layers = "+str(n_hidden_layers))
@@ -124,9 +133,29 @@ if __name__ == "__main__":
     valid_x = input_set[80000:90000]
     test_x = input_set[90000:100000]
 
-    train_y = 2 * output_set[:80000] - 1
-    valid_y = 2 * output_set[80000:90000] - 1
-    test_y = 2 * output_set[90000:100000] - 1
+    train_y = output_set[:80000]
+    valid_y = output_set[80000:90000]
+    test_y = output_set[90000:100000]
+    
+    train_x = np.asarray(train_x)
+    valid_x = np.asarray(valid_x)
+    test_x = np.asarray(test_x)     
+
+    train_y = np.asarray(train_y)
+    valid_y = np.asarray(valid_y)
+    test_y = np.asarray(test_y)
+
+    train_x = min_max(train_x)
+    valid_x = min_max(valid_x)
+    test_x = min_max(test_x)
+    train_y = min_max(train_y)
+    valid_y = min_max(valid_y)
+    test_y = min_max(test_y)
+
+    train_y = 2 * train_y - 1
+    valid_y = 2 * valid_y - 1
+    test_y = 2 * test_y - 1
+    
     print(len(test_y))
     train_x = 2 * train_x.reshape(-1, 1, 1, 6) - 1
     valid_x = 2 * valid_x.reshape(-1, 1, 1, 6) - 1
@@ -139,35 +168,6 @@ if __name__ == "__main__":
     #valid_set = MNIST(which_set= 'train', start=50000, stop = 60000, center = False)
     #test_set = MNIST(which_set= 'test', center = False)
     
-    # bc01 format    
-    # Inputs in the range [-1,+1]
-    # print("Inputs in the range [-1,+1]")
-    # print(type(train_set.X))
-    # print(train_set.X.ndim)
-    # print(train_set.X.shape)
-    # print(train_set.X[2][222:300]) 
-    # train_set.X = 2* train_set.X.reshape(-1, 1, 28, 28) - 1
-    #valid_set.X = 2* valid_set.X.reshape(-1, 1, 28, 28) - 1.
-    #test_set.X = 2* test_set.X.reshape(-1, 1, 28, 28) - 1.
-   
-    # print(type(train_set.X))
-    # print(train_set.X.ndim)
-    # print(train_set.X.shape)
-    # print(train_set.y[0:9])    
-    # flatten targets
-    # train_set.y = np.hstack(train_set.y)
-    # valid_set.y = np.hstack(valid_set.y)
-    # test_set.y = np.hstack(test_set.y)
-    
-    # Onehot the targets
-    # train_set.y = np.float32(np.eye(10)[train_set.y])    
-    # valid_set.y = np.float32(np.eye(10)[valid_set.y])
-    # test_set.y = np.float32(np.eye(10)[test_set.y])
-    
-    # for hinge loss
-    #train_set.y = 2* train_set.y - 1.
-    #valid_set.y = 2* valid_set.y - 1.
-    #test_set.y = 2* test_set.y - 1.
 
     print('Building the MLP...') 
     
